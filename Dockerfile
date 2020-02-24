@@ -9,14 +9,12 @@ MAINTAINER Sébastien Santoro aka Dereckson <dereckson+nasqueron-docker@espace-w
 # Prepare the container
 #
 
-ENV PHP_VERSION 7.4.2
-ENV ONIGURAMA_VERSION 6.9.4
+ENV PHP_VERSION 7.2.27
 ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=app --with-fpm-group=app
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_BUILD_DEPS bzip2 \
 		file \
 		libbz2-dev \
-		libzip-dev \
 		libcurl4-openssl-dev \
 		libjpeg-dev \
 		libpng12-dev \
@@ -38,8 +36,8 @@ RUN apt-get update && apt-get install -y ca-certificates curl libxml2 autoconf \
     && dpkg-reconfigure locales
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
-	5A52880781F755608BF815FC910DEB46F53EA312 \
-	42670A7FE4D0441C8E4632349E4FDC074A4EF02D \
+	B1B44D8F021E4E2D6021E995DC9FF8D3EE5AF27F \
+	1729F83938DA44E27BA0F4D3DBDB397470D12172 \
 	&& mkdir -p $PHP_INI_DIR/conf.d \
 	&& set -x \
 	&& curl -SL "http://php.net/get/php-$PHP_VERSION.tar.bz2/from/this/mirror" -o php.tar.bz2 \
@@ -48,11 +46,6 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
 	&& mkdir -p /usr/src/php \
 	&& tar -xof php.tar.bz2 -C /usr/src/php --strip-components=1 \
 	&& rm php.tar.bz2* \
-	&& wget -O /usr/src/onigurama.tar.gz https://github.com/kkos/oniguruma/releases/download/v$ONIGURAMA_VERSION/onig-$ONIGURAMA_VERSION.tar.gz \
-	&& cd /usr/src \
-	&& tar xzf onigurama.tar.gz \
-	&& cd onig-$ONIGURAMA_VERSION \
-	&& ./configure && make && make install \
 	&& cd /usr/src/php \
 	&& export CFLAGS="-fstack-protector-strong -fpic -fpie -O2" \
 	&& export CPPFLAGS="$CFLAGS" \
@@ -67,11 +60,11 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
 		--with-bz2 \
 		--enable-calendar \
 		--with-curl \
-		--enable-gd \
-		--with-jpeg \
-		--with-freetype \
-		--with-xpm \
-		--with-webp \
+		--with-gd \
+		--with-jpeg-dir \
+		--with-freetype-dir \
+		--with-xpm-dir \
+		--with-webp-dir \
 		--enable-exif \
 		--enable-ftp \
 		--with-libedit \
@@ -83,8 +76,7 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
 		--with-xsl \
 		--with-readline \
 		--with-zlib \
-		--with-zip \
-		--with-pear \
+		--enable-zip \
 	&& make -j"$(nproc)" \
 	&& make install \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
