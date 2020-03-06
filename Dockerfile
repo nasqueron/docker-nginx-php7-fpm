@@ -34,8 +34,9 @@ RUN apt-get update && apt-get install -y ca-certificates curl libxml2 autoconf \
     gcc libc-dev make pkg-config nginx-full gnupg \
     runit nano less tmux wget git locales unzip \
     $PHP_BUILD_DEPS $PHP_EXTRA_BUILD_DEPS \
-    --no-install-recommends && rm -r /var/lib/apt/lists/* \
-    && dpkg-reconfigure locales
+    --no-install-recommends && apt-get autoremove -y && apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    dpkg-reconfigure locales
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
 	5A52880781F755608BF815FC910DEB46F53EA312 \
@@ -93,7 +94,7 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-keys \
 	&& pecl install APCu \
 	&& cd /opt \
 	&& curl -sS https://getcomposer.org/installer | php \
-	&& ln -s /opt/composer.phar /usr/local/bin/composer
+	&& ln -s /opt/composer.phar /usr/local/bin/composer 
 
 RUN groupadd -r app -g 433 && \
 	mkdir /home/app && \
@@ -102,10 +103,6 @@ RUN groupadd -r app -g 433 && \
 	chown -R app:app /home/app /var/wwwroot/default && \
 	chmod 700 /home/app && \
 	chmod 711 /var/wwwroot/default
-
-RUN apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY files / 
 
